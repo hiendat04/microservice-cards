@@ -1,0 +1,57 @@
+package com.microservice.cards.controller;
+
+import com.microservice.cards.constants.CardsConstants;
+import com.microservice.cards.dto.ErrorResponseDto;
+import com.microservice.cards.dto.ResponseDto;
+import com.microservice.cards.service.impl.CardsServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
+@AllArgsConstructor
+public class CardsController {
+
+    private CardsServiceImpl cardService;
+
+    @Operation(
+            summary = "Create Card REST API",
+            description = "API to create card details in the Cards microservice"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "HTTP Status CREATED"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    }
+    )
+    @PostMapping("/create")
+    public ResponseEntity<ResponseDto> createCard(@Valid @RequestParam
+                                                  @Pattern(regexp="(^$|[0-9]{10})",message = "Mobile number must be 10 digits")
+                                                  String mobileNumber) {
+        cardService.createCard(mobileNumber);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ResponseDto(CardsConstants.STATUS_201, CardsConstants.MESSAGE_201));
+    }
+}
