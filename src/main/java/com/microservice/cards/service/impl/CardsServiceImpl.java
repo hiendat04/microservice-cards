@@ -1,8 +1,11 @@
 package com.microservice.cards.service.impl;
 
 import com.microservice.cards.constants.CardsConstants;
+import com.microservice.cards.dto.CardsDto;
 import com.microservice.cards.entity.Cards;
 import com.microservice.cards.exception.CardAlreadyExistsException;
+import com.microservice.cards.exception.ResourceNotFoundException;
+import com.microservice.cards.mapper.CardsMapper;
 import com.microservice.cards.repository.CardsRepository;
 import com.microservice.cards.service.ICardsService;
 import lombok.AllArgsConstructor;
@@ -36,6 +39,14 @@ public class CardsServiceImpl implements ICardsService {
         newCard.setAmountUsed(0);
         newCard.setAvailableAmount(CardsConstants.NEW_CARD_LIMIT);
         return newCard;
+    }
+
+    @Override
+    public CardsDto fetchCard(String mobileNumber) {
+        Cards cards = cardsRepository.findByMobileNumber(mobileNumber).orElseThrow(
+                () -> new ResourceNotFoundException("Card", "mobileNumber", mobileNumber)
+        );
+        return CardsMapper.mapToCardsDto(cards, new CardsDto());
     }
 
 }
